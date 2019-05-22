@@ -1,0 +1,15 @@
+{
+  "name": "workman",
+  "version": "1.0.0",
+  "description": "work management client code",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "jocoo",
+  "license": "ISC",
+  "dependencies": {
+    "interactjs": "^1.4.1",
+    "jquery": "^3.4.1"
+  }
+}

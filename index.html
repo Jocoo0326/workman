@@ -4,15 +4,29 @@
     <meta charset="UTF-8"/>
     <title>工单管理系统</title>
     <link rel="stylesheet" href="css/main.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="css/dragula.min.css">
   </head>
-  <body>
+  <body id="main">
     <div class="wrapper">
+      <div class="pool container" id="pool"></div>
+      <div class="pool container" id="pool1"></div>
       <div class="board-view-container">
-        <div class="board-view-component dark-theme" id="board-view-component">
-          
+        <div class="board-view-header">
+          <a class="header-btn date-backward noselect">
+            <span class="button-text">后退</span>
+          </a>
+          <a class="header-btn date-forward noselect">
+            <span class="button-text">前进</span>
+          </a>
+        </div>
+        <div class="board-view-component dark-theme">
+          <div class="left" id="board-view-kind"></div>
+          <div class="right" id="board-view-timeline" style="overflow: hidden; position: relative;"></div>
         </div>
       </div>
     </div>
-    <script src="js/main.js"></script>
+    <script src="js/dragula.min.js"></script>
+    <!-- <script src="js/main.js"></script> -->
+    <script src="app.js"></script>
   </body>
 </html>

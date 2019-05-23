@@ -83,6 +83,8 @@ div.board-view-container {
   width: 1200px;
   height: 100%;
   background-color: rgba(28, 31, 59, 0.7);
+  /* background-color: #eee; */
+  border: 1px solid #333;
 }
 
 div.board-view-component {
@@ -128,6 +130,9 @@ div.board-view-date-container ul li, div.board-view-tl-background ul li {
   font-weight: 400;
   position: relative;
 }
+div.board-view-date-container ul li.date-day {
+  color: blue;
+}
 div.board-view-date-container ul li.date-day, div.board-view-tl-background ul li.with-line {
   width: 60px;
 }
@@ -143,8 +148,11 @@ div.board-view-tl-background ul li.with-line::before {
   left: 0px;
   background: #151835;
 }
-div.board-view-tl-background ul li.with-line.today {
-  background-color: #634c4c;
+div.board-view-tl-background ul li.with-line.past {
+  background-color: #eee;
+}
+div.board-view-tl-background ul li.with-line {
+  background-color: #fff;
 }
 div.board-view-tl-background ul li.with-line span.first-day {
   position: absolute;
@@ -172,39 +180,31 @@ div.board-view-tl-background ul li.with-line span.month-name {
   color: white;
 }
 .board-view-header {
-  height: 46px;
+  height: 50px;
   padding: 8px 10px;
   display: flex;
   flex-direction: row-reverse;
   border-bottom: 1px solid rgba(28, 31, 59, 0.7);
 }
-.board-view-header .header-btn:first-child {
-  border-radius: 0 16px 16px 0;
-  border-left: none;
-}
-.board-view-header .header-btn:last-child {
-  border-radius: 16px 0 0 16px;
-}
 .board-view-header .header-btn {
-  color: #ffffff;
-  /* border: 1px solid #6E6F8F; */
-  border: 1px solid rgba(28, 31, 59, 0.7);
-  display: -ms-flexbox;
-  display: flex;
-  -ms-flex-pack: center;
-  justify-content: center;
-  -ms-flex-align: center;
-  align-items: center;
-  font-size: 12px;
-  background-color: transparent;
-  transition: 0.1s background-color ease-in, 0.1s color ease-in;
+  width: 50px;
+  height: 32px;
+  position: relative;
+  display: inline-block;
   cursor: pointer;
-  padding: 0px 16px;
-  text-decoration: none;
 }
-.board-view-header .header-btn:hover {
-  background-color: #6E6F8F;
-  color: #ffffff;
+.board-view-header .header-btn img {
+  height: 32px;
+}
+.board-view-header .date-backward .top, .board-view-header .date-forward .top {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 99;
+}
+.board-view-header .date-backward:hover .top, .board-view-header .date-forward:hover .top {
+  display: inline;
 }
 div.pool {
   display: flex;
@@ -230,4 +230,11 @@ div.board-view-content {
   top: 0px;
   left: 0px;
   margin-top: 32px;
+}
+div.drag-preview {
+  width: 100px;
+  height: 100px;
+  background: #151835;
+  border: 1px dotted #2a6496; 
+  margin: 10px;
 }

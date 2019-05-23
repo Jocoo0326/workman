@@ -16,8 +16,8 @@
     this.populateVerticalAxis();
     this.generateTimeData();
     this.createBackground();
-    this.initContent();
     this.createDates();
+    this.initContent();
     this.bindDatesMovingListeners();
     this.initState();
   };
@@ -26,8 +26,23 @@
     var html = [];
     this.main.innerHTML += '<div id="board-view-content" class="board-view-content container">' + 
       html.join('') + '</div>';
-      var content = document.querySelector('#pool1');
-    dragula([document.querySelector('#pool'), content]);
+      var content = document.querySelector('#board-view-content');
+      // var content = document.querySelector('#pool1');
+    // dragula([document.querySelector('#pool'), content]);
+    content.addEventListener("dragenter", function(e) {
+      e.preventDefault();
+      console.log("ondragenter");
+    });
+    content.addEventListener("dragover", function(e) {
+      e.preventDefault();
+      console.log("ondragover");
+      content.innerHTML = '<div class="drag-preview"></div>';
+    });
+    content.addEventListener("dragleave", function(e) {
+      e.preventDefault();
+      console.log("dragleave");
+      content.innerHTML = '';
+    });
   };
 
   BoardView.prototype.createPool = function() {
@@ -38,9 +53,10 @@
     var html = [];
     works.map(function(w) {
       // html.push('<div class="work"><span class="noselect">' + w.name + '</div>');
-      html.push('<div class="work">' + w.name + '</div>');
+      html.push('<div class="work" draggable="true">' + w.name + '</div>');
     })
     this.pool.innerHTML += html.join('');
+
   };
 
   var Work = function(name, amount) {
@@ -63,11 +79,10 @@
 
   function getTranslate(item) {
     var transArr = [];
-
     if (!window.getComputedStyle) return;
-    var style     = getComputedStyle(item),
-        transform = style.transform || style.webkitTransform || style.mozTransform || style.msTransform;
-    var mat       = transform.match(/^matrix3d\((.+)\)$/);
+    var style = getComputedStyle(item),
+      transform = style.transform || style.webkitTransform || style.mozTransform || style.msTransform;
+    var mat = transform.match(/^matrix3d\((.+)\)$/);
     if (mat) return parseFloat(mat[1].split(', ')[13]);
 
     mat = transform.match(/^matrix\((.+)\)$/);
@@ -78,8 +93,8 @@
 }
 
   BoardView.prototype.bindDatesMovingListeners = function() {
-    var date_backward = document.querySelector("a.date-backward");
-    var date_forward = document.querySelector("a.date-forward");
+    var date_backward = document.querySelector("div.date-backward");
+    var date_forward = document.querySelector("div.date-forward");
     var thiz = this;
     date_forward.addEventListener('click', function() {
       var ts = getTranslate(thiz.getDateContainer());
@@ -153,16 +168,10 @@
       for (var d = 1; d <= v.getDaysInMonth(); d++) {
         // html.push('<li class="with-line"><span>' + d + "</span></>");
         html.push('<li class="with-line');
-        if (v.isThisMonth() && d == v.today()) {
-          html.push(' today');
+        if (v.isPast(d)) {
+          html.push(' past');
         } 
         html.push('">');
-        if (d == 1) {
-          html.push('<span class="month-name">' + (v.month+1) + '月</span>');
-        } 
-        if (v.isWeekFirstDay(d)) {
-          html.push('<span class="first-day">星期一</span>');
-        }
         html.push('</li>');
       }
     });
@@ -174,7 +183,7 @@
     var html = [];
     this.timeData.map(function(v){
       for (var d = 1; d <= v.getDaysInMonth(); d++) {
-        html.push('<li class="date-day"><span>' + d + "</span></>");
+        html.push('<li class="date-day"><span>' + (v.month + 1) + '/' + d + "</span></>");
       }
     });
     this.main.innerHTML += '<div class="board-view-date-container"><ul>' 
@@ -204,6 +213,13 @@
   Month.prototype.today = function() {
     return new Date().getDate();
   };
+
+  Month.prototype.isPast = function(d) {
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var t = new Date(this.year, this.month, d);
+    return t.getTime() < today.getTime();
+  }
 
   Month.prototype.isWeekFirstDay = function(d) {
     var date = new Date(this.year, this.month, d);

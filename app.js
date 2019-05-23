@@ -26,7 +26,7 @@
     var html = [];
     this.main.innerHTML += '<div id="board-view-content" class="board-view-content container">' + 
       html.join('') + '</div>';
-      var content = document.querySelector('#board-view-content');
+      var content = document.querySelector('#pool1');
     dragula([document.querySelector('#pool'), content]);
   };
 

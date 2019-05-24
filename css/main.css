@@ -238,3 +238,29 @@ div.drag-preview {
   border: 1px dotted #2a6496; 
   margin: 10px;
 }
+div.board-view-content div.row {
+  height: 60px;
+  padding: 20px 0px;
+}
+div.board-view-content div.work {
+  width: 240px;
+  height: 20px;
+  background-color: #459e9d;
+  color: #fff;
+  border-radius: 10px;
+  position: absolute;
+  transform: translateZ(0);
+  transition: transform 0.15s ease-out, background-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+}
+div.board-view-content div.work {
+  text-align: center;
+  left: 3180px;
+}
+div.board-view-content div.work-preview {
+  margin-left: 3180px;
+  width: 240px;
+  height: 20px;
+  background-color: #84bdbc;
+  border-radius: 10px;
+  opacity: .8;
+}

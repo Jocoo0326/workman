@@ -1,6 +1,6 @@
 
 // var $ = require('jquery');
-// var dragula = require('dragula');
+var dragula = require('dragula');
 'use strict';
 
 (function(){
@@ -26,23 +26,32 @@
     var html = [];
     this.main.innerHTML += '<div id="board-view-content" class="board-view-content container">' + 
       html.join('') + '</div>';
-      var content = document.querySelector('#board-view-content');
+    var content = document.querySelector('#board-view-content');
+    html = [];
+    // html.push('<div class="row" style="width: ' + this.getBoardWith() +
+    //   'px;"><div class="work"><span>work1</span></div></div>')
+    // html.push('<div class="row"><div class="work-preview"><span>work1</span></div></div>')
+    html.push('<div class="row"><div class="work-preview"></div></div>')
+    content.innerHTML += html.join('');
       // var content = document.querySelector('#pool1');
-    // dragula([document.querySelector('#pool'), content]);
-    content.addEventListener("dragenter", function(e) {
-      e.preventDefault();
-      console.log("ondragenter");
+    dragula([document.querySelector('#pool'), content])
+    .on('over', function(el, container) {
+      console.log(container);
     });
-    content.addEventListener("dragover", function(e) {
-      e.preventDefault();
-      console.log("ondragover");
-      content.innerHTML = '<div class="drag-preview"></div>';
-    });
-    content.addEventListener("dragleave", function(e) {
-      e.preventDefault();
-      console.log("dragleave");
-      content.innerHTML = '';
-    });
+    // content.addEventListener("dragenter", function(e) {
+    //   e.preventDefault();
+    //   console.log("ondragenter");
+    // });
+    // content.addEventListener("dragover", function(e) {
+    //   e.preventDefault();
+    //   console.log("ondragover");
+    //   content.innerHTML = '<div class="drag-preview"></div>';
+    // });
+    // content.addEventListener("dragleave", function(e) {
+    //   e.preventDefault();
+    //   console.log("dragleave");
+    //   content.innerHTML = '';
+    // });
   };
 
   BoardView.prototype.createPool = function() {
@@ -53,7 +62,7 @@
     var html = [];
     works.map(function(w) {
       // html.push('<div class="work"><span class="noselect">' + w.name + '</div>');
-      html.push('<div class="work" draggable="true">' + w.name + '</div>');
+      html.push('<div class="work">' + w.name + '</div>');
     })
     this.pool.innerHTML += html.join('');
 
@@ -97,11 +106,11 @@
     var date_forward = document.querySelector("div.date-forward");
     var thiz = this;
     date_forward.addEventListener('click', function() {
-      var ts = getTranslate(thiz.getDateContainer());
+      var ts = getTranslate(thiz.main);
       thiz.scrollToPosition(ts[0] + thiz.date_item_width);
     });
     date_backward.addEventListener('click', function() {
-      var ts = getTranslate(thiz.getDateContainer());
+      var ts = getTranslate(thiz.main);
       thiz.scrollToPosition(ts[0] - thiz.date_item_width);
     });
   };
@@ -117,8 +126,7 @@
   }
 
   BoardView.prototype.scrollToPosition = function(p) {
-    this.getDateContainer().style.transform = 'translate(' + this.clipScrollRange(p) + 'px)';
-    this.getDateBackground().style.transform = 'translate(' + this.clipScrollRange(p) + 'px)';
+    this.main.style.transform = 'translate(' + this.clipScrollRange(p) + 'px)';
   };
 
   BoardView.prototype.clipScrollRange = function(r) {
@@ -156,13 +164,18 @@
 
   BoardView.prototype.generateTimeData = function() {
     var months = [];
-    months.push(this.createMonth(2019, 3));
     months.push(this.createMonth(2019, 4));
     months.push(this.createMonth(2019, 5));
+    months.push(this.createMonth(2019, 6));
     this.timeData = months;
   }
 
+  BoardView.prototype.getBoardWith = function() {
+    return this.getTotalCols() * this.date_item_width;
+  };
+
   BoardView.prototype.createBackground = function() {
+    this.main.style.width = this.getBoardWith()  + 'px';
     var html = [];
     this.timeData.map(function(v){
       for (var d = 1; d <= v.getDaysInMonth(); d++) {
@@ -171,8 +184,7 @@
         if (v.isPast(d)) {
           html.push(' past');
         } 
-        html.push('">');
-        html.push('</li>');
+        html.push('"></li>');
       }
     });
     this.main.innerHTML += '<div class="board-view-tl-background"><ul>' 
@@ -196,11 +208,11 @@
   };
 
   BoardView.prototype.createMonth = function(year, month) {
-    return new Month(year, month);
+    return new Month(year, month - 1);
   }
   
   Month.prototype.getDaysInMonth = function() {
-    return new Date(this.year, this.month, 0).getDate();
+    return new Date(this.year, this.month + 1, 0).getDate();
   };
 
   Month.prototype.isThisMonth = function() {

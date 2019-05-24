@@ -4,7 +4,8 @@
   "description": "work management client code",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "run": "powershell ./build.ps1"
   },
   "repository": {
     "type": "git",

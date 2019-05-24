@@ -1,2 +1,2 @@
-browserify app.js > js/main.js
+browserify app.js -o js/main.js
 start index.html

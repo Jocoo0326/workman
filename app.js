@@ -33,7 +33,6 @@ var classes = require('dragula/classes');
     dragula([document.querySelector('#pool'), content],
       {
         moves: function (item, source, handle, nextEl) {
-          console.log(item, source, handle, nextEl);
           if (source === thiz.getContentContainer() && isPast(item)) {
             return false;
           }
@@ -42,31 +41,31 @@ var classes = require('dragula/classes');
           function isPast(el) {
             var rect = el.getBoundingClientRect();
             var contentrect = thiz.getContentContainer().getBoundingClientRect();
-            console.log(rect);
             return rect.x + rect.width < contentrect.x + thiz.getNowOffsetPx();
           }
         }
       })
-      .on('over', function (item, _lastDropTarget, _source) {
-      }).drag = function (item, dropTarget, clientX, clientY, mirror) {
+      .drag = function (item, dropTarget, clientX, clientY, mirror) {
+        var mr = mirror.getBoundingClientRect();
+        var mx = getBoundRectX(mr);
+        var my = getBoundRectY(mr);
         if (dropTarget === content) {
           dropTarget.insertBefore(item, null);
-          // console.log(calcCellOffsetsUnderPoint());
           var pos = calcCellOffsetsUnderPoint();
           item.style.left = pos[0] + 'px';
           item.style.top = pos[1] + 'px';
           item.style.width = calcWidth(pos[1], item) * thiz.date_item_width - 2 + 'px';
-          if (collision()) {
-            classes.add(item, "collision");
-          } else {
-            classes.rm(item, "collision");
-          }
+          // if (collision()) {
+          //   classes.add(item, "collision");
+          // } else {
+          //   classes.rm(item, "collision");
+          // }
           var l = pos[0];
-          while (collision()) {
+          while (collision() && l < thiz.getTotalCols() * thiz.date_item_width) {
             l += thiz.date_item_width;
             item.style.left = l + 'px';
           }
-          classes.rm(item, "collision");
+          // classes.rm(item, "collision");
           return true;
         } else {
           item.removeAttribute("style");
@@ -75,10 +74,10 @@ var classes = require('dragula/classes');
 
         function calcCellOffsetsUnderPoint() {
           var contentRect = dropTarget.getBoundingClientRect();
-          var x = Math.floor((clientX - contentRect.x) / thiz.date_item_width) * thiz.date_item_width;
-          x = Math.max(thiz.getNowOffsetPx(), x);
-          var y = Math.floor((clientY - contentRect.y) / thiz.date_item_width) * thiz.date_item_width;
-          y = Math.min(thiz.date_item_width * (thiz.kinds.length - 1), y);
+          var x = Math.floor((mx - getBoundRectX(contentRect)) / thiz.date_item_width) * thiz.date_item_width;
+          x = Math.min(Math.max(thiz.getNowOffsetPx(), x), thiz.getTotalCols() * thiz.date_item_width);
+          var y = Math.floor((my - getBoundRectY(contentRect)) / thiz.date_item_width) * thiz.date_item_width;
+          y = Math.max(0, Math.min(thiz.date_item_width * (thiz.kinds.length - 1), y));
           return [x, y];
         }
 
@@ -98,11 +97,19 @@ var classes = require('dragula/classes');
 
         function isCollide(a, b) {
           return !(
-            ((a.y + a.height) <= (b.y)) ||
-            (a.y >= (b.y + b.height)) ||
-            ((a.x + a.width) <= b.x) ||
-            (a.x >= (b.x + b.width))
+            ((getBoundRectY(a) + a.height) <= (getBoundRectY(b))) ||
+            (getBoundRectY(a) >= (getBoundRectY(b) + b.height)) ||
+            ((getBoundRectX(a) + a.width) <= getBoundRectX(b)) ||
+            (getBoundRectX(a) >= (getBoundRectX(b) + b.width))
           );
+        }
+
+        function getBoundRectX(r) {
+          return r.x || r.left;
+        }
+
+        function getBoundRectY(r) {
+          return r.y || r.top;
         }
 
         function calcWidth(mac, wk) {
@@ -162,11 +169,9 @@ var classes = require('dragula/classes');
         pastScheduals.push(new Schedual(w, m, beg, end));
       }
     }
-    console.log(pastScheduals);
     
     var html = [];
     pastScheduals.map((function (v) {
-      console.log(v);
       html.push('<div class="work" id="' + v.work.name + '" style="left: ' +
         v.beg * this.date_item_width + 'px; top: ' + (parseInt(v.mac.id) - 1) * this.date_item_width +
         'px; width: ' + ((v.end - v.beg) * this.date_item_width - 2) + 'px;'

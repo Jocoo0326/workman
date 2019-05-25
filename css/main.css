@@ -243,10 +243,10 @@ div.board-view-content div.row {
 div.board-view-content div.work {
   text-align: center;
   width: 240px;
-  height: 59px;
-  margin-top: 1px;
+  height: 50px;
+  margin-top: 5px;
   margin-left: 1px;
-  line-height: 58px;
+  line-height: 48px;
   border-radius: 10px;
   opacity: .8;
   color: blue;

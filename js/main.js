@@ -267,6 +267,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
 
 // var $ = require('jquery');
 var dragula = require('dragula');
+var classes = require('dragula/classes');
 'use strict';
 
 (function(){
@@ -290,48 +291,109 @@ var dragula = require('dragula');
 
   BoardView.prototype.initContent = function() {
     var html = [];
-    this.main.innerHTML += '<div id="board-view-content" class="board-view-content container">' + 
+    this.main.innerHTML += '<div id="board-view-content" class="board-view-content container noselect">' + 
       html.join('') + '</div>';
-    var content = document.querySelector('#board-view-content');
-    html = [];
-    // html.push('<div class="row" style="width: ' + this.getBoardWith() +
-    //   'px;"><div class="work"><span>work1</span></div></div>')
-    // html.push('<div class="row"><div class="work-preview"><span>work1</span></div></div>')
-    html.push('<div class="row"><div class="work-preview"></div></div>')
-    content.innerHTML += html.join('');
-      // var content = document.querySelector('#pool1');
-    dragula([document.querySelector('#pool'), content])
-    .on('over', function(el, container) {
-      console.log(container);
-    });
-    // content.addEventListener("dragenter", function(e) {
-    //   e.preventDefault();
-    //   console.log("ondragenter");
-    // });
-    // content.addEventListener("dragover", function(e) {
-    //   e.preventDefault();
-    //   console.log("ondragover");
-    //   content.innerHTML = '<div class="drag-preview"></div>';
-    // });
-    // content.addEventListener("dragleave", function(e) {
-    //   e.preventDefault();
-    //   console.log("dragleave");
-    //   content.innerHTML = '';
-    // });
+    var content = this.getContentContainer();
+
+    var thiz = this;
+    dragula([document.querySelector('#pool'), content],
+      {
+        moves: function (item, source, handle, nextEl) {
+          console.log(item, source, handle, nextEl);
+          if (source === thiz.getContentContainer() && isPast(item)) {
+            return false;
+          }
+          return true;
+
+          function isPast(el) {
+            var rect = el.getBoundingClientRect();
+            var contentrect = thiz.getContentContainer().getBoundingClientRect();
+            console.log(rect);
+            return rect.x + rect.width < contentrect.x + thiz.getNowOffsetPx();
+          }
+        }
+      })
+      .on('over', function (item, _lastDropTarget, _source) {
+      }).drag = function (item, dropTarget, clientX, clientY, mirror) {
+        if (dropTarget === content) {
+          dropTarget.insertBefore(item, null);
+          // console.log(calcCellOffsetsUnderPoint());
+          var pos = calcCellOffsetsUnderPoint();
+          item.style.left = pos[0] + 'px';
+          item.style.top = pos[1] + 'px';
+          item.style.width = calcWidth(pos[1], item) * thiz.date_item_width - 2 + 'px';
+          if (collision()) {
+            classes.add(item, "collision");
+          } else {
+            classes.rm(item, "collision");
+          }
+          var l = pos[0];
+          while (collision()) {
+            l += thiz.date_item_width;
+            item.style.left = l + 'px';
+          }
+          classes.rm(item, "collision");
+          return true;
+        } else {
+          item.removeAttribute("style");
+          return false;
+        }
+
+        function calcCellOffsetsUnderPoint() {
+          var contentRect = dropTarget.getBoundingClientRect();
+          var x = Math.floor((clientX - contentRect.x) / thiz.date_item_width) * thiz.date_item_width;
+          x = Math.max(thiz.getNowOffsetPx(), x);
+          var y = Math.floor((clientY - contentRect.y) / thiz.date_item_width) * thiz.date_item_width;
+          y = Math.min(thiz.date_item_width * (thiz.kinds.length - 1), y);
+          return [x, y];
+        }
+
+        function collision() {
+          var works = content.children;
+          const itemrect = item.getBoundingClientRect();
+          for (let index = 0; index < works.length; index++) {
+            const element = works[index];
+            if (element != item) {
+              if (isCollide(itemrect, element.getBoundingClientRect())) {
+                return true;
+              }
+            }
+          }
+          return false;
+        }
+
+        function isCollide(a, b) {
+          return !(
+            ((a.y + a.height) <= (b.y)) ||
+            (a.y >= (b.y + b.height)) ||
+            ((a.x + a.width) <= b.x) ||
+            (a.x >= (b.x + b.width))
+          );
+        }
+
+        function calcWidth(mac, wk) {
+          var v = parseInt(wk.id) + mac/60;
+          return Math.floor((v + 3.1) % 3) + 3;
+        }
+    };
   };
 
   BoardView.prototype.createPool = function() {
     var works = [];
-    works.push(new Work("X", 5))
-    works.push(new Work("Y", 10))
-    works.push(new Work("Z", 15))
+    works.push(new Work("001", 1000))
+    works.push(new Work("002", 1500))
+    works.push(new Work("003", 2000))
+    works.push(new Work("004", 2500))
+    works.push(new Work("005", 3000))
+    works.push(new Work("006", 3500))
+    works.push(new Work("007", 4000))
+    works.push(new Work("008", 4500))
     var html = [];
     works.map(function(w) {
       // html.push('<div class="work"><span class="noselect">' + w.name + '</div>');
-      html.push('<div class="work">' + w.name + '</div>');
+      html.push('<div class="work" id="' + w.name + '">产品: ' + w.name + ' 数量: ' + w.amount + '</div>');
     })
     this.pool.innerHTML += html.join('');
-
   };
 
   var Work = function(name, amount) {
@@ -339,7 +401,51 @@ var dragula = require('dragula');
     this.amount = amount;
   };
 
+  var Schedual = function (work, mac, beg, end) {
+    this.work = work;
+    this.mac = mac;
+    this.beg = beg;
+    this.end = end;
+  }
+
+
   BoardView.prototype.initState = function() {
+    this.scrollToPosition((this.getNowOffset() - this.today_offset_left) * this.date_item_width * -1);
+    
+    // generate some schedual past data for preview
+    var pastScheduals = [];
+    const M = 1000;
+    var l = this.getNowOffset();
+    var id = M;
+    for (let i = 0; i < this.kinds.length; i++) {
+      for (let j = 0; j < 10; j++) {
+        var r = l - j * 10;
+        var end = r - randInt(6);
+        var beg = end - (randInt(3) + 3);
+        if (beg < 0) continue;
+        var w = new Work((id++) + '', randInt(M));
+        var m = this.kinds[i];
+        pastScheduals.push(new Schedual(w, m, beg, end));
+      }
+    }
+    console.log(pastScheduals);
+    
+    var html = [];
+    pastScheduals.map((function (v) {
+      console.log(v);
+      html.push('<div class="work" id="' + v.work.name + '" style="left: ' +
+        v.beg * this.date_item_width + 'px; top: ' + (parseInt(v.mac.id) - 1) * this.date_item_width +
+        'px; width: ' + ((v.end - v.beg) * this.date_item_width - 2) + 'px;'
+        + '">产品: ' + v.work.name + ' 数量: ' + v.work.amount + '</div>');
+    }).bind(this));
+    this.getContentContainer().innerHTML += html.join('');
+  };
+
+  function randInt(v) {
+    return Math.floor(v * Math.random());
+  }
+
+  BoardView.prototype.getNowOffset = function () {
     var offset = 0;
     for (var i = 0; i < this.timeData.length; i++) {
       var v = this.timeData[i];
@@ -349,8 +455,12 @@ var dragula = require('dragula');
       }
       offset += v.getDaysInMonth();
     }
-    this.scrollToPosition((offset - this.today_offset_left) * this.date_item_width * -1);
-  };
+    return offset;
+  }
+
+  BoardView.prototype.getNowOffsetPx = function () {
+    return this.getNowOffset() * this.date_item_width;
+  }
 
   function getTranslate(item) {
     var transArr = [];
@@ -391,6 +501,11 @@ var dragula = require('dragula');
       (this.date_background = document.querySelector("div.board-view-tl-background")));
   }
 
+  BoardView.prototype.getContentContainer = function() {
+    return (this.content_container || 
+      (this.content_container = document.querySelector("#board-view-content")));
+  }
+
   BoardView.prototype.scrollToPosition = function(p) {
     this.main.style.transform = 'translate(' + this.clipScrollRange(p) + 'px)';
   };
@@ -419,11 +534,24 @@ var dragula = require('dragula');
       return datelen;
   };
 
+  var Mac = function (id, name) {
+    this.id = id;
+    this.name = name;
+  }
+
   BoardView.prototype.populateVerticalAxis = function() {
-    var kinds = ['A', 'B', 'C', 'D', 'E', 'F'];
+    var kinds = [
+      new Mac(1, '1号机'),
+      new Mac(2, '2号机'),
+      new Mac(3, '3号机'),
+      new Mac(4, '4号机'),
+      new Mac(5, '5号机'),
+      new Mac(6, '6号机'),
+    ];
+    this.kinds = kinds;
     var html = [];
     kinds.map(function(k) {
-      html.push('<li><span>' + k + '</span></li>');
+      html.push('<li><span class="noselct">' + k.name + '</span></li>');
     });
     this.kind.innerHTML += '<ul>' + html.join('') + '</ul>';
   };
@@ -504,12 +632,17 @@ var dragula = require('dragula');
     return date.getDay() == 1;
   };
 
+  var Day = function (month, day) {
+    this.month = month;
+    this.day = day;
+  }
+
   window.BoardView = BoardView;
 })();
 
 new BoardView('pool', 'board-view-kind', 'board-view-timeline');
 
-},{"dragula":11}],4:[function(require,module,exports){
+},{"dragula":11,"dragula/classes":10}],4:[function(require,module,exports){
 module.exports = function atoa (a, n) { return Array.prototype.slice.call(a, n); }
 
 },{}],5:[function(require,module,exports){
@@ -784,9 +917,14 @@ function rmClass (el, className) {
   el.className = el.className.replace(lookupClass(className), ' ').trim();
 }
 
+function hasClass(el, classNmae) {
+  return lookupClass(classNmae).test(el.className);
+}
+
 module.exports = {
   add: addClass,
-  rm: rmClass
+  rm: rmClass,
+  has: hasClass
 };
 
 },{}],11:[function(require,module,exports){
@@ -1147,6 +1285,34 @@ function dragula (initialContainers, options) {
     }
   }
 
+  function throttle(fn, delay, delta) {
+    var timer = null;
+    var x = -1000;
+    var y = -1000;
+    return function (e) {
+      var cx = getCoord('clientX', e);
+      var cy = getCoord('clientY', e);
+
+      if (x === -1000 && y === -1000) {
+        x = cx;
+        y = cy;
+      }
+      if (Math.abs(x - cx) > delta || Math.abs(y - cy) > delta) {
+        fn(e);
+        x = cx;
+        y = cy;
+        clearTimeout(timer);
+      } else {
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          fn(e);
+          x = -1000;
+          y = -1000;
+        }, delay);
+      }
+    }
+  }
+
   function drag (e) {
     if (!_mirror) {
       return;
@@ -1190,14 +1356,16 @@ function dragula (initialContainers, options) {
       }
       return;
     }
-    if (
-      (reference === null && changed) ||
-      reference !== item &&
-      reference !== nextEl(item)
-    ) {
-      _currentSibling = reference;
-      dropTarget.insertBefore(item, reference);
-      drake.emit('shadow', item, dropTarget, _source);
+    if (drake.drag && !drake.drag(item, dropTarget, clientX, clientY, _mirror)) {
+      if (
+        (reference === null && changed) ||
+        reference !== item &&
+        reference !== nextEl(item)
+      ) {
+        _currentSibling = reference;
+        dropTarget.insertBefore(item, reference);
+        drake.emit('shadow', item, dropTarget, _source);
+      }
     }
     function moved (type) { drake.emit(type, item, _lastDropTarget, _source); }
     function over () { if (changed) { moved('over'); } }
@@ -1224,6 +1392,7 @@ function dragula (initialContainers, options) {
     classes.add(_mirror, 'gu-mirror');
     o.mirrorContainer.appendChild(_mirror);
     touchy(documentElement, 'add', 'mousemove', drag);
+    // touchy(documentElement, 'add', 'mousemove', throttle(drag, 600, 5));
     classes.add(o.mirrorContainer, 'gu-unselectable');
     drake.emit('cloned', _mirror, _item, 'mirror');
   }

@@ -82,7 +82,8 @@ body#main {
 div.board-view-container {
   width: 1200px;
   height: 100%;
-  background-color: rgba(28, 31, 59, 0.7);
+  /* background-color: rgba(28, 31, 59, 0.7); */
+  background-color: rgba(227, 228, 239, 0.7);
   /* background-color: #eee; */
   border: 1px solid #333;
 }
@@ -106,8 +107,8 @@ div.board-view-component div.left ul li {
   vertical-align: middle;
 }
 div.board-view-component div.left ul li span {
-  color: white;
-  font-size: 20px;
+  color: blue;
+  font-size: 18px;
 }
 div.board-view-date-container {
   position: absolute;
@@ -210,18 +211,9 @@ div.pool {
   display: flex;
   background-color: #fff;
   border: 1px solid #151835;
+  border-bottom: none;
   height: 120px;
-}
-div.pool .work {
-  width: 60px;
-  height: 60px;
-  background-color: #428bca;
-  margin-left: 5px;
-  margin-top: 5px;
-  line-height: 58px;
-  text-align: center;
-  vertical-align: middle;
-  cursor: grab;
+  padding: 5px;
 }
 div.board-view-content {
   width: 100%;
@@ -240,11 +232,7 @@ div.drag-preview {
 }
 div.board-view-content div.row {
   height: 60px;
-  padding: 20px 0px;
-}
-div.board-view-content div.work {
   width: 240px;
-  height: 20px;
   background-color: #459e9d;
   color: #fff;
   border-radius: 10px;
@@ -254,13 +242,39 @@ div.board-view-content div.work {
 }
 div.board-view-content div.work {
   text-align: center;
-  left: 3180px;
-}
-div.board-view-content div.work-preview {
-  margin-left: 3180px;
   width: 240px;
-  height: 20px;
-  background-color: #84bdbc;
+  height: 59px;
+  margin-top: 1px;
+  margin-left: 1px;
+  line-height: 58px;
   border-radius: 10px;
   opacity: .8;
+  color: blue;
+  position: absolute;
+  background-color: #428bca;
+}
+div.board-view-content div.work.gu-transit {
+  background-color: #84bdbc;
+  color: black;
+}
+div.board-view-content div.work {
+  color: white;
+}
+div.board-view-content div.work.collision {
+  background-color: pink;
+}
+div.pool div.work {
+  margin-left: 5px;
+  margin-top: 5px;
+  color: white;
+}
+.work {
+  width: 144px;
+  height: 40px;
+  background-color: #428bca;
+  line-height: 38px;
+  text-align: center;
+  vertical-align: middle;
+  cursor: grab;
+  border-radius: 5px;
 }

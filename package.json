@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "test",
-    "run": "powershell ./build.ps1"
+    "dragula": "cd dragula && npm run build && cd ..",
+    "build": "npm run dragula && webpack && start index.html",
+    "browserify": "browserify app.js -o dist/main.js",
+    "dev": "webpack-dev-server --open"
   },
   "repository": {
     "type": "git",
@@ -13,8 +16,13 @@
   },
   "author": "jocoo",
   "license": "ISC",
-  "dependencies": {
-    "dragula": "^3.7.2",
-    "jquery": "^3.4.1"
+  "dependencies": {},
+  "devDependencies": {
+    "css-loader": "^2.1.1",
+    "mini-css-extract-plugin": "^0.7.0",
+    "style-loader": "^0.23.1",
+    "webpack": "^4.32.2",
+    "webpack-cli": "^3.3.2",
+    "webpack-dev-server": "^3.4.1"
   }
 }

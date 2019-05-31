@@ -1,2 +1,2 @@
-browserify app.js -o js/main.js
+npm run build
 start index.html

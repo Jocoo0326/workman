@@ -1,14 +1,14 @@
 
 // var $ = require('jquery');
-var dragula = require('dragula');
-var classes = require('dragula/classes');
+import dragula from './dragula/dist/dragula.js';
+import './dragula/dist/dragula.css'
 'use strict';
 
 (function(){
   var BoardView = function(pool, kind, main) {
-    this.pool = (typeof pool === 'string') ? document.querySelector('#'+pool) : pool;
-    this.kind = (typeof kind === 'string') ? document.querySelector('#'+kind) : kind;
-    this.main = (typeof main === 'string') ? document.querySelector('#'+main) : main;
+    this.pool = getElById(pool);
+    this.kind = getElById(kind);
+    this.main = getElById(main);
     this.date_item_width = 60; // px
     this.viewport_cols = 19; // viewport column size
     this.today_offset_left = 5;
@@ -23,6 +23,10 @@ var classes = require('dragula/classes');
     this.initState();
   };
 
+  function getElById(id) {
+    return (typeof id === 'string') ? document.querySelector('#'+id) : id;
+  }
+
   BoardView.prototype.initContent = function() {
     var html = [];
     this.main.innerHTML += '<div id="board-view-content" class="board-view-content container noselect">' + 
@@ -31,20 +35,20 @@ var classes = require('dragula/classes');
 
     var thiz = this;
     dragula([document.querySelector('#pool'), content],
-      {
-        moves: function (item, source, handle, nextEl) {
-          if (source === thiz.getContentContainer() && isPast(item)) {
-            return false;
-          }
-          return true;
+            {
+              moves: function (item, source, handle, nextEl) {
+                if (source === thiz.getContentContainer() && isPast(item)) {
+                  return false;
+                }
+                return true;
 
-          function isPast(el) {
-            var rect = el.getBoundingClientRect();
-            var contentrect = thiz.getContentContainer().getBoundingClientRect();
-            return rect.x + rect.width < contentrect.x + thiz.getNowOffsetPx();
-          }
-        }
-      })
+                function isPast(el) {
+                  var rect = el.getBoundingClientRect();
+                  var contentrect = thiz.getContentContainer().getBoundingClientRect();
+                  return rect.x + rect.width < contentrect.x + thiz.getNowOffsetPx();
+                }
+              }
+            })
       .drag = function (item, dropTarget, clientX, clientY, mirror) {
         var mr = mirror.getBoundingClientRect();
         var mx = getBoundRectX(mr);
@@ -55,17 +59,12 @@ var classes = require('dragula/classes');
           item.style.left = pos[0] + 'px';
           item.style.top = pos[1] + 'px';
           item.style.width = calcWidth(pos[1], item) * thiz.date_item_width - 2 + 'px';
-          // if (collision()) {
-          //   classes.add(item, "collision");
-          // } else {
-          //   classes.rm(item, "collision");
-          // }
+
           var l = pos[0];
           while (collision() && l < thiz.getTotalCols() * thiz.date_item_width) {
             l += thiz.date_item_width;
             item.style.left = l + 'px';
           }
-          // classes.rm(item, "collision");
           return true;
         } else {
           item.removeAttribute("style");
@@ -98,9 +97,9 @@ var classes = require('dragula/classes');
         function isCollide(a, b) {
           return !(
             ((getBoundRectY(a) + a.height) <= (getBoundRectY(b))) ||
-            (getBoundRectY(a) >= (getBoundRectY(b) + b.height)) ||
-            ((getBoundRectX(a) + a.width) <= getBoundRectX(b)) ||
-            (getBoundRectX(a) >= (getBoundRectX(b) + b.width))
+              (getBoundRectY(a) >= (getBoundRectY(b) + b.height)) ||
+              ((getBoundRectX(a) + a.width) <= getBoundRectX(b)) ||
+              (getBoundRectX(a) >= (getBoundRectX(b) + b.width))
           );
         }
 
@@ -116,24 +115,23 @@ var classes = require('dragula/classes');
           var v = parseInt(wk.id) + mac/60;
           return Math.floor((v + 3.1) % 3) + 3;
         }
-    };
+      };
   };
 
   BoardView.prototype.createPool = function() {
     var works = [];
-    works.push(new Work("001", 1000))
-    works.push(new Work("002", 1500))
-    works.push(new Work("003", 2000))
-    works.push(new Work("004", 2500))
-    works.push(new Work("005", 3000))
-    works.push(new Work("006", 3500))
-    works.push(new Work("007", 4000))
-    works.push(new Work("008", 4500))
+    works.push(new Work("001", 1000));
+    works.push(new Work("002", 1500));
+    works.push(new Work("003", 2000));
+    works.push(new Work("004", 2500));
+    works.push(new Work("005", 3000));
+    works.push(new Work("006", 3500));
+    works.push(new Work("007", 4000));
+    works.push(new Work("008", 4500));
     var html = [];
     works.map(function(w) {
-      // html.push('<div class="work"><span class="noselect">' + w.name + '</div>');
       html.push('<div class="work" id="' + w.name + '">产品: ' + w.name + ' 数量: ' + w.amount + '</div>');
-    })
+    });
     this.pool.innerHTML += html.join('');
   };
 
@@ -147,7 +145,7 @@ var classes = require('dragula/classes');
     this.mac = mac;
     this.beg = beg;
     this.end = end;
-  }
+  };
 
 
   BoardView.prototype.initState = function() {
@@ -173,9 +171,9 @@ var classes = require('dragula/classes');
     var html = [];
     pastScheduals.map((function (v) {
       html.push('<div class="work" id="' + v.work.name + '" style="left: ' +
-        v.beg * this.date_item_width + 'px; top: ' + (parseInt(v.mac.id) - 1) * this.date_item_width +
-        'px; width: ' + ((v.end - v.beg) * this.date_item_width - 2) + 'px;'
-        + '">产品: ' + v.work.name + ' 数量: ' + v.work.amount + '</div>');
+                v.beg * this.date_item_width + 'px; top: ' + (parseInt(v.mac.id) - 1) * this.date_item_width +
+                'px; width: ' + ((v.end - v.beg) * this.date_item_width - 2) + 'px;'
+                + '">产品: ' + v.work.name + ' 数量: ' + v.work.amount + '</div>');
     }).bind(this));
     this.getContentContainer().innerHTML += html.join('');
   };
@@ -195,17 +193,17 @@ var classes = require('dragula/classes');
       offset += v.getDaysInMonth();
     }
     return offset;
-  }
+  };
 
-  BoardView.prototype.getNowOffsetPx = function () {
+  BoardView.prototype.getNowOffsetPx = function() {
     return this.getNowOffset() * this.date_item_width;
-  }
+  };
 
   function getTranslate(item) {
     var transArr = [];
-    if (!window.getComputedStyle) return;
+    if (!window.getComputedStyle) return null;
     var style = getComputedStyle(item),
-      transform = style.transform || style.webkitTransform || style.mozTransform || style.msTransform;
+        transform = style.transform || style.webkitTransform || style.mozTransform || style.msTransform;
     var mat = transform.match(/^matrix3d\((.+)\)$/);
     if (mat) return parseFloat(mat[1].split(', ')[13]);
 
@@ -214,7 +212,7 @@ var classes = require('dragula/classes');
     mat ? transArr.push(parseFloat(mat[1].split(', ')[5])) : transArr.push(0);
 
     return transArr;
-}
+  };
 
   BoardView.prototype.bindDatesMovingListeners = function() {
     var date_backward = document.querySelector("div.date-backward");
@@ -232,18 +230,18 @@ var classes = require('dragula/classes');
 
   BoardView.prototype.getDateContainer = function() {
     return (this.date_container || 
-      (this.date_container = document.querySelector("div.board-view-date-container")));
-  }
+            (this.date_container = document.querySelector("div.board-view-date-container")));
+  };
 
   BoardView.prototype.getDateBackground = function() {
     return (this.date_background || 
-      (this.date_background = document.querySelector("div.board-view-tl-background")));
-  }
+            (this.date_background = document.querySelector("div.board-view-tl-background")));
+  };
 
   BoardView.prototype.getContentContainer = function() {
     return (this.content_container || 
-      (this.content_container = document.querySelector("#board-view-content")));
-  }
+            (this.content_container = document.querySelector("#board-view-content")));
+  };
 
   BoardView.prototype.scrollToPosition = function(p) {
     this.main.style.transform = 'translate(' + this.clipScrollRange(p) + 'px)';
@@ -260,23 +258,21 @@ var classes = require('dragula/classes');
   };
 
   BoardView.prototype.getScrollRange = function() {
-    return [0,
-      (this.viewport_cols - this.getTotalCols()) * this.date_item_width
-    ];
+    return [0, (this.viewport_cols - this.getTotalCols()) * this.date_item_width];
   };
 
   BoardView.prototype.getTotalCols = function() {
-      var datelen = 0;
-      this.timeData.map(function(v){
-        datelen += v.getDaysInMonth();
-      });
-      return datelen;
+    var datelen = 0;
+    this.timeData.map(function(v){
+      datelen += v.getDaysInMonth();
+    });
+    return datelen;
   };
 
   var Mac = function (id, name) {
     this.id = id;
     this.name = name;
-  }
+  };
 
   BoardView.prototype.populateVerticalAxis = function() {
     var kinds = [
@@ -301,7 +297,7 @@ var classes = require('dragula/classes');
     months.push(this.createMonth(2019, 5));
     months.push(this.createMonth(2019, 6));
     this.timeData = months;
-  }
+  };
 
   BoardView.prototype.getBoardWith = function() {
     return this.getTotalCols() * this.date_item_width;
@@ -312,7 +308,6 @@ var classes = require('dragula/classes');
     var html = [];
     this.timeData.map(function(v){
       for (var d = 1; d <= v.getDaysInMonth(); d++) {
-        // html.push('<li class="with-line"><span>' + d + "</span></>");
         html.push('<li class="with-line');
         if (v.isPast(d)) {
           html.push(' past');
@@ -320,8 +315,7 @@ var classes = require('dragula/classes');
         html.push('"></li>');
       }
     });
-    this.main.innerHTML += '<div class="board-view-tl-background"><ul>' 
-              + html.join('') + '</ul></div>';
+    this.main.innerHTML += '<div class="board-view-tl-background"><ul>' + html.join('') + '</ul></div>';
   };
 
   BoardView.prototype.createDates = function() {
@@ -331,8 +325,7 @@ var classes = require('dragula/classes');
         html.push('<li class="date-day"><span>' + (v.month + 1) + '/' + d + "</span></>");
       }
     });
-    this.main.innerHTML += '<div class="board-view-date-container"><ul>' 
-              + html.join('') + '</ul></div>';
+    this.main.innerHTML += '<div class="board-view-date-container"><ul>' + html.join('') + '</ul></div>';
   };
 
   var Month = function(year, month) {
@@ -342,7 +335,7 @@ var classes = require('dragula/classes');
 
   BoardView.prototype.createMonth = function(year, month) {
     return new Month(year, month - 1);
-  }
+  };
   
   Month.prototype.getDaysInMonth = function() {
     return new Date(this.year, this.month + 1, 0).getDate();
@@ -364,7 +357,7 @@ var classes = require('dragula/classes');
     today.setHours(0, 0, 0, 0);
     var t = new Date(this.year, this.month, d);
     return t.getTime() < today.getTime();
-  }
+  };
 
   Month.prototype.isWeekFirstDay = function(d) {
     var date = new Date(this.year, this.month, d);
@@ -374,7 +367,7 @@ var classes = require('dragula/classes');
   var Day = function (month, day) {
     this.month = month;
     this.day = day;
-  }
+  };
 
   window.BoardView = BoardView;
 })();
